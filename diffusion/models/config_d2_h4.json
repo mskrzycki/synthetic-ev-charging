@@ -1,0 +1,16 @@
+{
+  "network": "attention",
+  "input_dim": 51,
+  "cond_dim": 12,
+  "hidden_dim": 128,
+  "nhead": 4,
+  "seq_len": 1,
+  "device": "cuda",
+  "n_steps": 1000,
+  "schedule": "linear",
+  "beta_start": 0.0001,
+  "beta_end": 0.02,
+  "init_lr": 0.001,
+  "n_epochs": 100,
+  "depth": 2
+}

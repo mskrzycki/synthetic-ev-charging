@@ -1,0 +1,14 @@
+{
+  "network": "attention",
+  "depth": 3,
+  "nhead": 2,
+  "n_steps": 1000,
+  "n_epochs": 200,
+  "lr": 0.0005,
+  "batch_size": 128,
+  "hidden_dim": 256,
+  "schedule": "linear",
+  "beta_end": 0.02,
+  "input_dim": 51,
+  "cond_dim": 12
+}
