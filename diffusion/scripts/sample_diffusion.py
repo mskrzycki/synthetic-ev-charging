@@ -1,8 +1,10 @@
+import argparse
+import io
 import math
 import pickle
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 import torch
@@ -11,20 +13,43 @@ from rdt import HyperTransformer
 from torch.utils.data import Dataset
 from diffusion import DDPM
 
-BASE = Path("...")
+class CPUUnpickler(pickle.Unpickler):
+    """Unpickler that maps CUDA tensors to CPU when CUDA is unavailable."""
+    # Remap CUDA storage classes to their CPU equivalents
+    _CUDA_TO_CPU = {
+        'torch.cuda': 'torch',
+        'torch.cuda.FloatStorage': 'torch.FloatStorage',
+        'torch.cuda.DoubleStorage': 'torch.DoubleStorage',
+        'torch.cuda.HalfStorage': 'torch.HalfStorage',
+        'torch.cuda.LongStorage': 'torch.LongStorage',
+        'torch.cuda.IntStorage': 'torch.IntStorage',
+        'torch.cuda.ShortStorage': 'torch.ShortStorage',
+        'torch.cuda.CharStorage': 'torch.CharStorage',
+        'torch.cuda.ByteStorage': 'torch.ByteStorage',
+        'torch.cuda.BFloat16Storage': 'torch.BFloat16Storage',
+    }
+
+    def find_class(self, module, name):
+        if module == 'torch.storage' and name == '_load_from_bytes':
+            return lambda b: torch.load(io.BytesIO(b), map_location='cpu')
+        # Remap any torch.cuda storage module to torch (CPU)
+        if module.startswith('torch.cuda'):
+            module = module.replace('torch.cuda', 'torch', 1)
+        return super().find_class(module, name)
+
+BASE = Path(__file__).resolve().parents[2]
 RAW_CSV = BASE / "data" / "EV_Charging_Data_processed.csv"
 MODEL_DIR = BASE / "diffusion" / "models"
 OUT_DIR = BASE / "diffusion" / "synthetic"
 YEAR = 2025
 SEED = 406
-FIXED_LOCATION = 3  # compare for the same location
+SEEDS = [406, 100, 200, 300, 400]  # 5 seeds for reproducibility runs
+DEFAULT_LOCATIONS: Optional[List[int]] = None  # None means evaluate all locations in data
 
 STEP_REDUCTION = 1000
 MAX_PER_BUCKET = 500
 
 OUT_DIR.mkdir(parents=True, exist_ok=True)
-np.random.seed(SEED)
-torch.manual_seed(SEED)
 
 dev = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -46,6 +71,18 @@ class FullDataset(Dataset):
     def __getitem__(self, idx):
         return { "input": self.input_data[idx].unsqueeze(0), "condition": self.cond_data[idx]}
 
+# Required for unpickling models trained with hyperparam_tuning_diffusion.py
+class ConditionalDataset(Dataset):
+    def __init__(self, x: np.ndarray, c: np.ndarray):
+        self.x = torch.tensor(x, dtype=torch.float32)
+        self.c = torch.tensor(c, dtype=torch.float32)
+
+    def __len__(self):
+        return len(self.x)
+
+    def __getitem__(self, idx):
+        return {"input": self.x[idx].unsqueeze(0), "condition": self.c[idx]}
+
 # helpers for yearly sampling
 def weekday_group(idx):
     return ("Mon-Th" if idx < 4 else "Friday" if idx == 4 else "Saturday" if idx == 5 else "Sunday")
@@ -63,6 +100,18 @@ def season_idx(dt):
 
 def leap(year):
     return (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)
+
+
+def resolve_locations(df_real: pd.DataFrame, selected_locations: Optional[List[int]]) -> List[int]:
+    available = sorted(df_real["location_group"].dropna().astype(int).unique().tolist())
+    if selected_locations is None:
+        return available
+
+    requested = sorted(set(int(loc) for loc in selected_locations))
+    missing = [loc for loc in requested if loc not in available]
+    if missing:
+        raise ValueError(f"Requested locations not found in data: {missing}. Available: {available}")
+    return requested
 
 # build the calendar and the buckets for season x weekday group
 def build_calendar(year):
@@ -97,12 +146,14 @@ def sample_batch(model: DDPM, cond_vec, n):
     return x.detach().cpu().numpy().reshape(n, -1)
 
 # generate for the year
-def generate_for_model(model_path, df_real, calendar, ht: HyperTransformer, condition_trans_cols):   
+def generate_for_model(model_path, df_real, calendar, location_id: int, seed: int, ht: HyperTransformer, condition_trans_cols):   
     with open(model_path, 'rb') as f:  # load the model
-        ddpm_model: DDPM = pickle.load(f)
-    
+        ddpm_model: DDPM = CPUUnpickler(f).load()
+
     ddpm_model.opt.device = dev
     ddpm_model.eps_model = ddpm_model.eps_model.to(dev)
+    if hasattr(ddpm_model.eps_model, 'device'):
+        ddpm_model.eps_model.device = dev
     
     schedule_tensors = ['beta', 'alpha', 'alpha_bar', 'sigma2'] # moving tensors to the device
     for tensor_name in schedule_tensors:
@@ -125,8 +176,9 @@ def generate_for_model(model_path, df_real, calendar, ht: HyperTransformer, cond
         ddpm_model.eps_model.input_projector.flatten_parameters()
     
     tag = model_path.stem.replace("model_", "") # take the tag from the saved model
-    
-    real_lg = df_real[df_real["location_group"] == FIXED_LOCATION] # filter for the lcoation
+    tag = f"{tag}_seed{seed}"
+
+    real_lg = df_real[df_real["location_group"] == location_id]
     counts = real_lg.groupby(["season", "weekday_group"]).size()
 
     all_output_cols = ht._output_columns 
@@ -142,7 +194,7 @@ def generate_for_model(model_path, df_real, calendar, ht: HyperTransformer, cond
     frames = []
     
     # sample for each combination season, weekday gr
-    for (seas, wg), dates in tqdm(calendar.items(), desc=f"Buckets {tag}"):
+    for (seas, wg), dates in tqdm(calendar.items(), desc=f"Buckets | loc {location_id} | seed {seed}"):
         total = int(counts.get((seas, wg), 0))
         if total == 0:
             continue
@@ -156,7 +208,7 @@ def generate_for_model(model_path, df_real, calendar, ht: HyperTransformer, cond
 
         # condition vectors
         full_row = pd.DataFrame(0, index=[0], columns=ALL_COLS)
-        full_row[['season', 'weekday_group', 'location_group']] = [seas, wg, FIXED_LOCATION]
+        full_row[['season', 'weekday_group', 'location_group']] = [seas, wg, location_id]
         
         # transforming the conditioning data
         transformed_full = ht.transform(full_row)
@@ -195,7 +247,7 @@ def generate_for_model(model_path, df_real, calendar, ht: HyperTransformer, cond
         synthetic_data = synthetic_data[OUTPUT_COLS].copy()
         synthetic_data["season"] = seas
         synthetic_data["weekday_group"] = wg
-        synthetic_data["location_group"] = FIXED_LOCATION
+        synthetic_data["location_group"] = location_id
         
         offset = 0 # assigning dates
         for date, cnt in zip(dates, daily):
@@ -216,22 +268,38 @@ def generate_for_model(model_path, df_real, calendar, ht: HyperTransformer, cond
     # save
     if frames:
         out_df = pd.concat(frames, ignore_index=True)
-        out_file = OUT_DIR / f"synthetic_location_{FIXED_LOCATION}_{tag}.csv"
+        out_file = OUT_DIR / f"synthetic_location_{location_id}_{tag}.csv"
         out_df.to_csv(out_file, index=False)
 
+
 def main():
+    parser = argparse.ArgumentParser(description="Generate diffusion synthetic data for one or multiple locations")
+    parser.add_argument(
+        "--locations",
+        nargs="+",
+        type=int,
+        default=DEFAULT_LOCATIONS,
+        help="Location IDs to sample (example: --locations 1 3 5). Default: all locations in dataset.",
+    )
+    args = parser.parse_args()
+
     df_real = pd.read_csv(RAW_CSV)[ALL_COLS].copy()
     calendar = build_calendar(YEAR)
-    
-    df_real = df_real[df_real["location_group"] == FIXED_LOCATION]
-    
+    target_locations = resolve_locations(df_real, args.locations)
+
     with open(MODEL_DIR / 'hyper_transformer.pkl', 'rb') as f:
-        ht, condition_trans_cols = pickle.load(f) 
-    
-    models = sorted(MODEL_DIR.glob("model_*.pkl"))
-        
-    for mp in tqdm(models, desc="Processing models"):
-        generate_for_model(mp, df_real, calendar, ht, condition_trans_cols)
+        ht, condition_trans_cols = pickle.load(f)
+
+    best_model = MODEL_DIR / "best_diffusion_model.pkl"
+    if not best_model.exists():
+        raise FileNotFoundError(f"Best diffusion model not found: {best_model}")
+
+    for seed in tqdm(SEEDS, desc="Seeds"):
+        for location_id in tqdm(target_locations, desc=f"Locations (seed={seed})", leave=False):
+            np.random.seed(seed)
+            torch.manual_seed(seed)
+            generate_for_model(best_model, df_real, calendar, location_id, seed, ht, condition_trans_cols)
+
 
 if __name__ == "__main__":
     main()

@@ -1,0 +1,2 @@
+Metric,Diffusion,CTGAN,better
+Frobenius Norm,0.329 ± 0.091,0.410 ± 0.061,lower

@@ -1,0 +1,9 @@
+Category,Metric,Diffusion,CTGAN,p_value,better
+Plug-in Hour,TV Complement,0.881 ± 0.015,0.861 ± 0.023,0.0042209625244140625,higher
+Plug-in Hour,JS Divergence,0.117 ± 0.014,0.125 ± 0.021,0.01068878173828125,lower
+Plug-out Hour,TV Complement,0.761 ± 0.025,0.726 ± 0.027,2.6702880859375e-05,higher
+Plug-out Hour,JS Divergence,0.249 ± 0.034,0.279 ± 0.025,1.9073486328125e-06,lower
+Connection Time,KS Complement,0.938 ± 0.012,0.920 ± 0.023,0.03623390197753906,higher
+Connection Time,Wasserstein Distance,1.238 ± 0.411,1.527 ± 0.978,0.06372261047363281,lower
+Energy Session,KS Complement,0.957 ± 0.021,0.906 ± 0.012,1.9073486328125e-06,higher
+Energy Session,Wasserstein Distance,0.679 ± 0.276,1.257 ± 0.271,0.000133514404296875,lower

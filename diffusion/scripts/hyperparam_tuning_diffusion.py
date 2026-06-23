@@ -1,5 +1,6 @@
 from __future__ import annotations
 import argparse
+import io
 import itertools
 import json
 import math
@@ -23,6 +24,15 @@ from diffusion import DDPM
 from network import Attention, CNN
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+class CPUUnpickler(pickle.Unpickler):
+    """Unpickler that maps CUDA tensors to CPU when CUDA is unavailable."""
+    def find_class(self, module, name):
+        if module == 'torch.storage' and name == '_load_from_bytes':
+            return lambda b: torch.load(io.BytesIO(b), map_location='cpu')
+        if module.startswith('torch.cuda'):
+            module = module.replace('torch.cuda', 'torch', 1)
+        return super().find_class(module, name)
 
 BASE = Path("...")
 DATA_CSV = BASE / "data" / "EV_Charging_Data_processed.csv"
@@ -363,7 +373,7 @@ def generate_yearly_sample( model: DDPM, ht: HyperTransformer,condition_cols,yea
 def main(skip_tune=False, year=2025):
     if MODEL_FILE.exists():
         with open(MODEL_FILE, "rb") as f:
-            model = pickle.load(f)
+            model = CPUUnpickler(f).load()
         
         _, _, ht, condition_cols = load_and_preprocess()
         

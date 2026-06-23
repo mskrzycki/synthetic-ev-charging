@@ -1,4 +1,5 @@
 from __future__ import annotations
+import io
 import math
 import pickle
 from datetime import datetime, timedelta
@@ -8,17 +9,28 @@ import numpy as np
 import pandas as pd
 from sdv.sampling import Condition
 from tqdm import tqdm
+import torch
 from custom_ctgan import CustomCTGAN
 
-BASE = Path("...")
+class CPUUnpickler(pickle.Unpickler):
+    """Unpickler that maps CUDA tensors to CPU when CUDA is unavailable."""
+    def find_class(self, module, name):
+        if module == 'torch.storage' and name == '_load_from_bytes':
+            return lambda b: torch.load(io.BytesIO(b), map_location='cpu')
+        if module.startswith('torch.cuda'):
+            module = module.replace('torch.cuda', 'torch', 1)
+        return super().find_class(module, name)
+
+BASE = Path(__file__).resolve().parents[2]
 RAW_CSV    = BASE / "data" / "EV_Charging_Data_processed.csv"
 MODEL_DIR  = BASE / "CTGAN" / "models"
 OUT_DIR    = BASE / "CTGAN" / "synthetic"
 YEAR       = 2025
 SEED       = 406
+SEEDS      = [406, 100, 200, 300, 400]  # 5 seeds for reproducibility runs
+BEST_MODEL_TAG = "d2_8h"  # best model identified by evaluation (model_d2_8h.pkl)
 
 OUT_DIR.mkdir(parents=True, exist_ok=True)
-np.random.seed(SEED)
 
 COND_COLS = ["season", "weekday_group", "location_group"]
 OUTPUT_FOCUS = ["plugin_hour", "connection_time", "energy_session"]
@@ -56,6 +68,7 @@ def build_calendar(year):
 
 # generate data for the bucket condition
 def sample_bucket(synth: CustomCTGAN, lg: int, seas: int, wg: str, n: int) -> pd.DataFrame:
+    n = int(n)
     if n == 0:
         return pd.DataFrame(columns=ALL_COLS)
     cond = Condition({"location_group": lg, "season": seas, "weekday_group": wg}, num_rows=n) # set the condition
@@ -66,11 +79,27 @@ def sample_bucket(synth: CustomCTGAN, lg: int, seas: int, wg: str, n: int) -> pd
     return block
 
 # generate a full year of data using the bucket sampling
-def generate_for_model(model_path: Path, lg: int, df_real: pd.DataFrame, calendar: Dict[Tuple[int, str], List[datetime]]):
+def generate_for_model(model_path: Path, lg: int, seed: int, df_real: pd.DataFrame, calendar: Dict[Tuple[int, str], List[datetime]]):
     with model_path.open("rb") as f:
-        synth: CustomCTGAN = pickle.load(f)
+        synth: CustomCTGAN = CPUUnpickler(f).load()
+
+    # Fix metadata API mismatch: current SDV expects _original_metadata to have a
+    # .tables dict, but the pickled model stores a bare SingleTableMetadata.
+    # Wrap it in a lightweight proxy so .tables[table_name] resolves correctly.
+    meta = synth._original_metadata
+    table_name = getattr(synth, '_table_name', 'table')
+    if not hasattr(meta, 'tables'):
+        class _MetaProxy:
+            def __init__(self, single_meta, tname):
+                self.tables = {tname: single_meta}
+                # forward attribute access to the inner metadata
+                self._inner = single_meta
+            def __getattr__(self, item):
+                return getattr(self._inner, item)
+        synth._original_metadata = _MetaProxy(meta, table_name)
 
     tag = model_path.stem.replace("model_", "")
+    tag = f"{tag}_seed{seed}"
     real_lg = df_real[df_real["location_group"] == lg]
     counts = real_lg.groupby(["season", "weekday_group"]).size()
 
@@ -114,14 +143,18 @@ def main():
     # load data
     df_real = pd.read_csv(RAW_CSV, usecols=ALL_COLS)
     np.random.seed(SEED)
-    lg_rand = int(np.random.choice(df_real["location_group"].unique())) # random location
+
+    best_model = MODEL_DIR / f"model_{BEST_MODEL_TAG}.pkl"
+    if not best_model.exists():
+        raise FileNotFoundError(f"Best CTGAN model not found: {best_model}")
 
     calendar = build_calendar(YEAR) # build a calendar for a year
-    models = sorted(MODEL_DIR.glob("model_*.pkl")) # load all models
+    all_locations = sorted(df_real["location_group"].dropna().astype(int).unique().tolist())
 
-    for mp in tqdm(models, desc="models"):
-        # for every model sample for every year
-        generate_for_model(mp, lg_rand, df_real, calendar)
+    for seed in tqdm(SEEDS, desc="Seeds"):
+        for lg in tqdm(all_locations, desc=f"Locations (seed={seed})", leave=False):
+            np.random.seed(seed)
+            generate_for_model(best_model, lg, seed, df_real, calendar)
 
 if __name__ == "__main__":
     main()
