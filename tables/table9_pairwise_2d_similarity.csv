@@ -1,0 +1,4 @@
+Pair,Metric,Diffusion,CTGAN,TabDDPM,p_value_holm,p_value_raw,better
+plugin_hour vs connection_time,2D TV Complement,0.703 ± 0.045,0.682 ± 0.047,n/a,0.000850677490234375,0.000850677490234375,higher
+plugin_hour vs energy_session,2D TV Complement,0.794 ± 0.042,0.752 ± 0.049,n/a,5.7220458984375e-06,1.9073486328125e-06,higher
+connection_time vs energy_session,2D TV Complement,0.825 ± 0.032,0.802 ± 0.038,n/a,0.000522613525390625,0.0002613067626953125,higher

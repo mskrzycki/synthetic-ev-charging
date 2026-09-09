@@ -7,7 +7,11 @@ from sdv.metadata import SingleTableMetadata
 import matplotlib.pyplot as plt
 import os
 
+<<<<<<< HEAD
 BASE = Path("...")
+=======
+BASE = Path(__file__).resolve().parents[2]
+>>>>>>> ee9996e (added new codes/data used in adding new analysis)
 DATA   = BASE / "data" / "EV_Charging_Data_processed.csv"  
 SETS   = BASE / "CTGAN" / "sets"  
 MOD    = BASE / "CTGAN" / "models"  
@@ -19,8 +23,18 @@ LOSS_PLOTS.mkdir(parents=True, exist_ok=True)
 
 EPOCHS = 300
 BATCH  = 500
+<<<<<<< HEAD
 DEPTHS = [1,2,3,4]       
 HEADS  = [None, 2, 4, 8]    
+=======
+DEPTHS = [int(v) for v in os.environ.get("CTGAN_DEPTHS", "1,2,3,4").split(",") if v]
+HEADS = [
+    None if v.lower() in {"none", "off"} else int(v)
+    for v in os.environ.get("CTGAN_HEADS", "none,2,4,8").split(",")
+    if v
+]
+FORCE_RETRAIN = os.environ.get("FORCE_RETRAIN", "0") == "1"
+>>>>>>> ee9996e (added new codes/data used in adding new analysis)
 
 COLS = [
     "location_group", "weekday_group", "plugin_hour", "plugin_day",
@@ -55,7 +69,11 @@ def train():
         for h in HEADS:
             tag = f"d{d}_{'off' if h is None else str(h)+'h'}"
             model_path = MOD / f"model_{tag}.pkl"
+<<<<<<< HEAD
             if model_path.exists(): # if already trained, don't train again
+=======
+            if model_path.exists() and not FORCE_RETRAIN: # if already trained, don't train again
+>>>>>>> ee9996e (added new codes/data used in adding new analysis)
                 continue
             
             ctgan = CustomCTGAN(
@@ -70,6 +88,12 @@ def train():
 
             print(f"Train: depth={d}, heads={h}")
             ctgan.fit(train_set.drop(columns="strata"))
+<<<<<<< HEAD
+=======
+
+            with model_path.open("wb") as f:
+                pickle.dump(ctgan, f)
+>>>>>>> ee9996e (added new codes/data used in adding new analysis)
         
             gen = ctgan.get_loss_values()['Generator Loss']
             disc = ctgan.get_loss_values()['Discriminator Loss']
@@ -89,4 +113,8 @@ def train():
     test_set.to_csv(SETS / "test.csv", index=False)
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     train()
+=======
+    train()
+>>>>>>> ee9996e (added new codes/data used in adding new analysis)

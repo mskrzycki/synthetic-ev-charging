@@ -32,6 +32,11 @@ class CPUUnpickler(pickle.Unpickler):
     def find_class(self, module, name):
         if module == 'torch.storage' and name == '_load_from_bytes':
             return lambda b: torch.load(io.BytesIO(b), map_location='cpu')
+<<<<<<< HEAD
+=======
+        if module == '__main__' and name in {'FullDataset', 'ConditionalDataset'}:
+            return globals()[name]
+>>>>>>> ee9996e (added new codes/data used in adding new analysis)
         # Remap any torch.cuda storage module to torch (CPU)
         if module.startswith('torch.cuda'):
             module = module.replace('torch.cuda', 'torch', 1)
@@ -302,4 +307,8 @@ def main():
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     main()
+=======
+    main()
+>>>>>>> ee9996e (added new codes/data used in adding new analysis)

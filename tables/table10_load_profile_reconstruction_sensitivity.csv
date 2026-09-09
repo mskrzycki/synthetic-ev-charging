@@ -1,0 +1,17 @@
+Reconstruction,Metric,charger_power_kw,Diffusion,CTGAN,TabDDPM,best_model,p_value_holm,p_value_raw,better
+Uniform energy,Load-curve RMSE,,0.074 ± 0.009,0.110 ± 0.012,n/a,diffusion,1.71661376953125e-05,5.7220458984375e-06,lower
+Uniform energy,Peak KS stat,,0.173 ± 0.028,0.123 ± 0.028,n/a,ctgan,0.00041961669921875,0.000209808349609375,lower
+Uniform energy,CV error,,0.362 ± 0.057,0.313 ± 0.085,n/a,ctgan,0.00041961669921875,0.0002613067626953125,lower
+Uniform energy,Peak rel. error,,0.161 ± 0.051,0.086 ± 0.061,n/a,ctgan,7.62939453125e-06,1.9073486328125e-06,lower
+Front-loaded 3.7 kW,Load-curve RMSE,3.7,0.079 ± 0.020,0.122 ± 0.026,n/a,diffusion,0.00067138671875,0.0001678466796875,lower
+Front-loaded 3.7 kW,Peak KS stat,3.7,0.290 ± 0.085,0.290 ± 0.081,n/a,ctgan,0.6215133666992188,0.6215133666992188,lower
+Front-loaded 3.7 kW,CV error,3.7,0.522 ± 0.117,0.498 ± 0.132,n/a,ctgan,0.2654533386230469,0.13272666931152344,lower
+Front-loaded 3.7 kW,Peak rel. error,3.7,0.202 ± 0.022,0.214 ± 0.017,n/a,diffusion,0.15950775146484375,0.05316925048828125,lower
+Front-loaded 7.4 kW,Load-curve RMSE,7.4,0.112 ± 0.021,0.171 ± 0.028,n/a,diffusion,0.0001068115234375,2.6702880859375e-05,lower
+Front-loaded 7.4 kW,Peak KS stat,7.4,0.378 ± 0.106,0.382 ± 0.109,n/a,diffusion,1.0,0.956329345703125,lower
+Front-loaded 7.4 kW,CV error,7.4,1.169 ± 0.664,1.149 ± 0.655,n/a,ctgan,1.0,0.5458755493164062,lower
+Front-loaded 7.4 kW,Peak rel. error,7.4,0.281 ± 0.028,0.276 ± 0.029,n/a,ctgan,1.0,0.49800872802734375,lower
+Front-loaded 11 kW,Load-curve RMSE,11.0,0.132 ± 0.016,0.198 ± 0.030,n/a,diffusion,7.62939453125e-06,1.9073486328125e-06,lower
+Front-loaded 11 kW,Peak KS stat,11.0,0.461 ± 0.111,0.441 ± 0.114,n/a,ctgan,0.2690849304199219,0.08969497680664062,lower
+Front-loaded 11 kW,CV error,11.0,1.399 ± 0.571,1.364 ± 0.527,n/a,ctgan,0.40489959716796875,0.20244979858398438,lower
+Front-loaded 11 kW,Peak rel. error,11.0,0.325 ± 0.028,0.319 ± 0.032,n/a,ctgan,0.40489959716796875,0.34881019592285156,lower

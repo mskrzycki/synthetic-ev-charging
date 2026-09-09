@@ -1,0 +1,5 @@
+Model,Median NN distance,Very-close rate (%),Rounded duplicate rate (%),n
+Held-out real,0.1406,1.01,0.024,8429
+Diffusion,0.2349 ± 0.0013,0.07 ± 0.01,0.000 ± 0.000,18570
+CTGAN,0.2074 ± 0.0012,0.13 ± 0.03,0.000 ± 0.000,28190
+TabDDPM,3.3050 ± 0.1174,0.00 ± 0.00,0.000 ± 0.000,28241

@@ -1,0 +1,8 @@
+Constraint,Real held-out (%),Diffusion (%),CTGAN (%),TabDDPM (%)
+Non-positive connection time,0.000,0.000 $\pm$ 0.000,0.000 $\pm$ 0.000,0.000 $\pm$ 0.000
+Connection time > 120 h,0.000,0.000 $\pm$ 0.000,0.000 $\pm$ 0.000,0.000 $\pm$ 0.000
+Non-positive energy,0.000,0.000 $\pm$ 0.000,0.000 $\pm$ 0.000,0.000 $\pm$ 0.000
+Energy > 100 kWh,0.000,0.000 $\pm$ 0.000,0.000 $\pm$ 0.000,46.223 $\pm$ 0.531
+Average power > 11 kW,0.178,0.185 $\pm$ 0.148,0.779 $\pm$ 0.223,51.993 $\pm$ 0.610
+Average power > 22 kW,0.000,0.001 $\pm$ 0.006,0.052 $\pm$ 0.042,24.767 $\pm$ 0.578
+Any broad violation,0.000,0.001 $\pm$ 0.006,0.052 $\pm$ 0.042,46.225 $\pm$ 0.531

@@ -1,0 +1,7 @@
+Step,Removed,Remaining
+Published dataset,-,35377
+Missing plug-in or plug-out timestamp,38,35339
+Delivered energy <= 0.5 kWh,439,34900
+Delivered energy > 150 kWh,0,34900
+Connection time < 2 h,5179,29721
+Excluded low-sample locations,1628,28093

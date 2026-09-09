@@ -1,0 +1,9 @@
+Location group,Tail variable,Real P90 threshold,Real exceedance (%),Diffusion exceedance (%),CTGAN exceedance (%),TabDDPM exceedance (%)
+1,Connection time,21.249832,10.021922956467272,14.9 $\pm$ 0.3,10.0 $\pm$ 0.1,47.9 $\pm$ 0.5
+1,Energy session,27.282000000000007,10.021922956467272,9.5 $\pm$ 0.3,8.6 $\pm$ 0.3,46.6 $\pm$ 0.4
+2,Connection time,22.511669000000005,10.019907100199072,12.7 $\pm$ 0.1,6.0 $\pm$ 0.4,48.2 $\pm$ 0.8
+2,Energy session,27.302000000000017,10.019907100199072,10.2 $\pm$ 0.3,8.2 $\pm$ 0.3,46.2 $\pm$ 0.3
+3,Connection time,40.65,9.987819732034104,6.5 $\pm$ 0.3,5.9 $\pm$ 0.3,48.0 $\pm$ 0.4
+3,Energy session,28.88,9.987819732034104,8.7 $\pm$ 0.7,9.7 $\pm$ 0.9,45.7 $\pm$ 0.7
+4,Connection time,38.6,9.992862241256246,7.7 $\pm$ 0.6,9.5 $\pm$ 0.5,47.9 $\pm$ 0.9
+4,Energy session,32.27,9.992862241256246,9.1 $\pm$ 0.9,7.8 $\pm$ 0.4,46.5 $\pm$ 0.3

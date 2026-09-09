@@ -15,7 +15,11 @@ from rdt import HyperTransformer
 from diffusion import DDPM
 
 # paths
+<<<<<<< HEAD
 BASE = Path("...")
+=======
+BASE = Path(__file__).resolve().parents[2]
+>>>>>>> ee9996e (added new codes/data used in adding new analysis)
 DATA_PATH = BASE / "data" / "EV_Charging_Data_processed.csv"
 MODEL_DIR = BASE / "diffusion" / "models"
 PLOT_DIR  = BASE / "diffusion" / "plots"
@@ -184,4 +188,8 @@ def main():
         print(f"Completed model {i+1}/{total}")
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     main()
+=======
+    main()
+>>>>>>> ee9996e (added new codes/data used in adding new analysis)

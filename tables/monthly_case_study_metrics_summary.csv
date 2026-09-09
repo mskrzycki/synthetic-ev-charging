@@ -1,0 +1,21 @@
+Evaluation period,Metric,Diffusion,Diffusion_n,CTGAN,CTGAN_n,TabDDPM,TabDDPM_n
+Year,Average Score,0.925 ± 0.013,20,0.896 ± 0.009,20,0.524 ± 0.017,20
+Year,Plug-in Hour TVC,0.881 ± 0.015,20,0.861 ± 0.023,20,0.629 ± 0.053,20
+Year,Connection Time KS,0.938 ± 0.012,20,0.920 ± 0.023,20,0.480 ± 0.006,20
+Year,Energy Session KS,0.957 ± 0.021,20,0.906 ± 0.012,20,0.462 ± 0.005,20
+January,Average Score,0.874 ± 0.037,20,0.832 ± 0.039,20,0.519 ± 0.018,20
+January,Plug-in Hour TVC,0.831 ± 0.050,20,0.756 ± 0.047,20,0.625 ± 0.043,20
+January,Connection Time KS,0.889 ± 0.043,20,0.834 ± 0.056,20,0.469 ± 0.020,20
+January,Energy Session KS,0.901 ± 0.039,20,0.905 ± 0.027,20,0.464 ± 0.026,20
+May,Average Score,0.855 ± 0.030,20,0.803 ± 0.036,20,0.500 ± 0.016,20
+May,Plug-in Hour TVC,0.756 ± 0.065,20,0.741 ± 0.079,20,0.567 ± 0.046,20
+May,Connection Time KS,0.905 ± 0.016,20,0.854 ± 0.055,20,0.470 ± 0.019,20
+May,Energy Session KS,0.902 ± 0.027,20,0.815 ± 0.024,20,0.462 ± 0.024,20
+July,Average Score,0.817 ± 0.065,20,0.799 ± 0.043,20,0.491 ± 0.013,20
+July,Plug-in Hour TVC,0.746 ± 0.070,20,0.746 ± 0.052,20,0.538 ± 0.029,20
+July,Connection Time KS,0.871 ± 0.044,20,0.866 ± 0.039,20,0.477 ± 0.014,20
+July,Energy Session KS,0.833 ± 0.089,20,0.786 ± 0.059,20,0.457 ± 0.016,20
+October,Average Score,0.871 ± 0.027,20,0.863 ± 0.012,20,0.526 ± 0.022,20
+October,Plug-in Hour TVC,0.829 ± 0.020,20,0.830 ± 0.026,20,0.631 ± 0.056,20
+October,Connection Time KS,0.867 ± 0.024,20,0.900 ± 0.027,20,0.482 ± 0.012,20
+October,Energy Session KS,0.918 ± 0.049,20,0.859 ± 0.026,20,0.466 ± 0.016,20

@@ -1,0 +1,6 @@
+Model location group,Included original location labels,Area type,Sessions
+Location group 1,"ASK, TRO_R","sub-urban, urban",10643
+Location group 2,"OSL_S, TRO",urban,10054
+Location group 3,BAR,sub-urban,2731
+Location group 4,OSL_T,urban,4665
+Excluded from modelling,"BER, BOD, KRO, OSL_1, OSL_2","rural, urban",1895
