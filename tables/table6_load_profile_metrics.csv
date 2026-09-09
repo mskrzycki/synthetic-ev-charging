@@ -1,5 +1,5 @@
-Metric,Diffusion,CTGAN,TabDDPM,p_value,p_value_raw,better
-Load-curve RMSE,0.074 ± 0.009,0.110 ± 0.012,nan ± nan,1.71661376953125e-05,5.7220458984375e-06,lower
-Peak KS stat,0.173 ± 0.028,0.123 ± 0.028,nan ± nan,0.00041961669921875,0.000209808349609375,lower
-CV error,0.362 ± 0.057,0.313 ± 0.085,nan ± nan,0.00041961669921875,0.0002613067626953125,lower
-Peak rel. error,0.161 ± 0.051,0.086 ± 0.061,nan ± nan,7.62939453125e-06,1.9073486328125e-06,lower
+Metric,Diffusion,CTGAN,p_value,better
+Load-curve RMSE,0.074 ± 0.009,0.110 ± 0.012,5.7220458984375e-06,lower
+Peak KS stat,0.173 ± 0.028,0.123 ± 0.028,0.000209808349609375,lower
+CV error,0.362 ± 0.057,0.313 ± 0.085,0.0002613067626953125,lower
+Peak rel. error,0.161 ± 0.051,0.086 ± 0.061,1.9073486328125e-06,lower
